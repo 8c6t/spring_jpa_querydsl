@@ -1,7 +1,6 @@
 package com.hachicore.querydsl;
 
 import com.hachicore.querydsl.entity.Member;
-import com.hachicore.querydsl.entity.QMember;
 import com.hachicore.querydsl.entity.Team;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 
+import static com.hachicore.querydsl.entity.QMember.member;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
@@ -57,12 +57,10 @@ public class QuerydslBasicTest {
 
     @Test
     void startQuerydsl() {
-        QMember m = new QMember("m");
-
         Member findMember = queryFactory
-                .select(m)
-                .from(m)
-                .where(m.username.eq("member1"))
+                .select(member)
+                .from(member)
+                .where(member.username.eq("member1"))
                 .fetchOne();
 
         assertEquals(findMember.getUsername(), "member1");
