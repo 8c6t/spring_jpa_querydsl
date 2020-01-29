@@ -17,6 +17,7 @@ import java.util.List;
 
 import static com.hachicore.querydsl.entity.QMember.member;
 import static com.hachicore.querydsl.entity.QTeam.team;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -201,6 +202,43 @@ public class QuerydslBasicTest {
 
         assertEquals(teamB.get(team.name), "teamB");
         assertEquals(teamB.get(member.age.avg()), 35);
+    }
+
+    /**
+     * 팀 A에 소속된 모든 회원
+     */
+    @Test
+    void join() {
+        List<Member> result = queryFactory
+                .selectFrom(member)
+                .leftJoin(member.team, team)
+                .where(team.name.eq("teamA"))
+                .fetch();
+
+        assertThat(result)
+                .extracting("username")
+                .containsExactly("member1", "member2");
+    }
+
+    /**
+     * 세타 조인
+     * 회원의 이름이 팀 이름과 같은 회원 조회
+     */
+    @Test
+    void thetaJoin() {
+        em.persist(new Member("teamA"));
+        em.persist(new Member("teamB"));
+        em.persist(new Member("teamC"));
+
+        List<Member> result = queryFactory
+                .select(member)
+                .from(member, team)
+                .where(member.username.eq(team.name))
+                .fetch();
+
+        assertThat(result)
+                .extracting("username")
+                .containsExactly("teamA", "teamB");
     }
 
 }
