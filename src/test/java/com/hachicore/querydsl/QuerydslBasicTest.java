@@ -1,6 +1,7 @@
 package com.hachicore.querydsl;
 
 import com.hachicore.querydsl.dto.MemberDto;
+import com.hachicore.querydsl.dto.QMemberDto;
 import com.hachicore.querydsl.dto.UserDto;
 import com.hachicore.querydsl.entity.Member;
 import com.hachicore.querydsl.entity.QMember;
@@ -546,6 +547,18 @@ public class QuerydslBasicTest {
                 .fetch();
 
         for (UserDto memberDto : result) {
+            System.out.println("memberDto = " + memberDto);
+        }
+    }
+
+    @Test
+    void findDtoByQueryProjection() {
+        List<MemberDto> result = queryFactory
+                .select(new QMemberDto(member.username, member.age))
+                .from(member)
+                .fetch();
+
+        for (MemberDto memberDto : result) {
             System.out.println("memberDto = " + memberDto);
         }
     }
