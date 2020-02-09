@@ -6,10 +6,12 @@ import com.hachicore.querydsl.dto.QMemberTeamDto;
 import com.hachicore.querydsl.entity.Member;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.support.PageableExecutionUtils;
 
 import javax.persistence.EntityManager;
 import java.util.List;
@@ -76,9 +78,9 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
     @Override
     public Page<MemberTeamDto> searchPageComplex(MemberSearchCondition condition, Pageable pageable) {
         List<MemberTeamDto> content = getMemberTeamDtos(condition, pageable);
-        Long total = getTotal(condition);
+        JPAQuery<Member> countQuery = getCountQuery(condition);
 
-        return new PageImpl<>(content, pageable, total);
+        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchCount);
     }
 
     private List<MemberTeamDto> getMemberTeamDtos(MemberSearchCondition condition, Pageable pageable) {
@@ -102,7 +104,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .fetch();
     }
 
-    private long getTotal(MemberSearchCondition condition) {
+    private JPAQuery<Member> getCountQuery(MemberSearchCondition condition) {
         return queryFactory
                 .select(member)
                 .from(member)
@@ -112,8 +114,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                         teamNameEq(condition.getTeamName()),
                         ageGoe(condition.getAgeGoe()),
                         ageLoe(condition.getAgeLoe())
-                )
-                .fetchCount();
+                );
     }
 
     public List<Member> searchMember(MemberSearchCondition condition) {
